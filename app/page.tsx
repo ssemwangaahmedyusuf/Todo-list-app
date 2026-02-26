@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 type Task = {
   id: string;
   text: string;
+  completed: boolean;
 };
 
 export default function Page() {
@@ -35,6 +36,7 @@ export default function Page() {
       const newTaskObject: Task = {
         id: crypto.randomUUID(),
         text: newTask,
+        completed: false,
       };
       setTasks((prev) => [...prev, newTaskObject]);
       setNewTask("");
@@ -44,6 +46,14 @@ export default function Page() {
   function deleteTask(id: string) {
     const updatedTasks = tasks.filter((task) => task.id !== id);
     setTasks(updatedTasks);
+  }
+
+  function toggleCompleted(id: string) {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task,
+      ),
+    );
   }
 
   function moveUp(id: string) {
@@ -114,11 +124,21 @@ export default function Page() {
               {/* <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 rounded-lg w-7 h-7 flex items-center justify-center shrink-0">
                 {task.id + 1}
               </span> */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => toggleCompleted(task.id)}
+                />
 
-              <span className="flex-1 text-white font-medium text-sm truncate">
-                {task.text}
-              </span>
-
+                <span
+                  className={`${
+                    task.completed ? "line-through text-gray-500" : ""
+                  }`}
+                >
+                  {task.text}
+                </span>
+              </div>
               <div className="flex gap-1.5 shrink-0">
                 <button
                   onClick={() => moveUp(task.id)}
