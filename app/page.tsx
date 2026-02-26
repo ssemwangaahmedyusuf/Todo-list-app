@@ -2,9 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 
+type Task = {
+  id: string;
+  text: string;
+};
+
 export default function Page() {
-  // Fix: Properly type the state as string array
-  const [tasks, setTasks] = useState<string[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState<string>("");
 
   useEffect(() => {
@@ -28,18 +32,22 @@ export default function Page() {
 
   function addTask() {
     if (newTask.trim() !== "") {
-      // Fix: Properly type the previous tasks
-      setTasks((prevTasks: string[]) => [...prevTasks, newTask]);
+      const newTaskObject: Task = {
+        id: crypto.randomUUID(),
+        text: newTask,
+      };
+      setTasks((prev) => [...prev, newTaskObject]);
       setNewTask("");
     }
   }
 
-  function deleteTask(index: number) {
-    const updatedTasks = tasks.filter((_: string, i: number) => i !== index);
+  function deleteTask(id: string) {
+    const updatedTasks = tasks.filter((task) => task.id !== id);
     setTasks(updatedTasks);
   }
 
-  function moveUp(index: number) {
+  function moveUp(id: string) {
+    const index = tasks.findIndex((task) => task.id === id);
     if (index > 0) {
       const updatedTasks = [...tasks];
       [updatedTasks[index], updatedTasks[index - 1]] = [
@@ -50,7 +58,8 @@ export default function Page() {
     }
   }
 
-  function moveDown(index: number) {
+  function moveDown(id: string) {
+    const index = tasks.findIndex((task) => task.id === id);
     if (index < tasks.length - 1) {
       const updatedTasks = [...tasks];
       [updatedTasks[index], updatedTasks[index + 1]] = [
@@ -97,38 +106,36 @@ export default function Page() {
               No tasks yet. Add one above!
             </p>
           )}
-          {tasks.map((task: string, index: number) => (
+          {tasks.map((task) => (
             <li
-              key={index}
+              key={task.id}
               className="flex items-center gap-3 bg-gray-700/50 border border-gray-600/40 rounded-xl px-4 py-3 group hover:border-emerald-500/40 hover:bg-gray-700/70 transition-all duration-150"
             >
-              <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 rounded-lg w-7 h-7 flex items-center justify-center shrink-0">
-                {index + 1}
-              </span>
+              {/* <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 rounded-lg w-7 h-7 flex items-center justify-center shrink-0">
+                {task.id + 1}
+              </span> */}
 
               <span className="flex-1 text-white font-medium text-sm truncate">
-                {task}
+                {task.text}
               </span>
 
               <div className="flex gap-1.5 shrink-0">
                 <button
-                  onClick={() => moveUp(index)}
-                  disabled={index === 0}
+                  onClick={() => moveUp(task.id)}
                   title="Move up"
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-600/60 hover:bg-blue-500/80 disabled:opacity-25 disabled:cursor-not-allowed text-white text-xs transition-all duration-150 active:scale-90"
                 >
                   ↑
                 </button>
                 <button
-                  onClick={() => moveDown(index)}
-                  disabled={index === tasks.length - 1}
+                  onClick={() => moveDown(task.id)}
                   title="Move down"
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-600/60 hover:bg-blue-500/80 disabled:opacity-25 disabled:cursor-not-allowed text-white text-xs transition-all duration-150 active:scale-90"
                 >
                   ↓
                 </button>
                 <button
-                  onClick={() => deleteTask(index)}
+                  onClick={() => deleteTask(task.id)}
                   title="Delete"
                   className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-600/60 hover:bg-red-500/80 text-white text-xs transition-all duration-150 active:scale-90"
                 >
